@@ -1,0 +1,14 @@
+node_modules/
+package-lock.json
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+AGENT_CONTEXT.md
+ref/
+illustrations/
+!frontend/public/illustrations/
+!frontend/public/illustrations/*.png

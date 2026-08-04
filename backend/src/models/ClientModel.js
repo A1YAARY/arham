@@ -6,7 +6,6 @@ class ClientModel {
   async upsertClients(clientsList) {
     if (!clientsList || clientsList.length === 0) return 0;
     
-   
     for (const client of clientsList) {
       await this.knex('clients')
         .insert({

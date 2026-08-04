@@ -8,7 +8,7 @@ class BseSyncManager {
     this.tradeModel = tradeModel;
     this.employeeModel = employeeModel;
     this.isSyncing = false;
-    this.bseBaseUrl = process.env.MOCK_BSE_URL || 'http://localhost:3000/api/bse';
+    this.bseBaseUrl = process.env.MOCK_BSE_URL || 'http://localhost:5000/api/bse';
   }
 
   async fetchJsonWithRetry(url, maxRetries = 5, timeoutMs = 25000) {
@@ -38,9 +38,7 @@ class BseSyncManager {
         });
         return data;
       } catch (error) {
-        console.warn(`[Sync Retry] Attempt ${attempt}/${maxRetries} failed for ${url}: ${error.message}`);
         if (attempt === maxRetries) throw error;
-        // Exponential backoff with jitter
         await new Promise((r) => setTimeout(r, Math.min(1000 * Math.pow(2, attempt), 8000)));
       }
     }
@@ -57,7 +55,6 @@ class BseSyncManager {
       }
       return true;
     } catch (err) {
-      console.error('[Internal Sync Error]', err.message);
       return false;
     }
   }
@@ -71,11 +68,9 @@ class BseSyncManager {
     this.io.emit('syncStatus', { status: 'IN_PROGRESS', progress: 0, message: 'Syncing Internal Employees...' });
 
     try {
-      // 1. Instant Internal Mappings Sync
       await this.syncInternalData();
       this.io.emit('syncStatus', { status: 'IN_PROGRESS', progress: 10, message: 'Employees synced. Pulling BSE Clients...' });
 
-      // 2. Paginated Clients Sync from BSE (handles 20% drops per page retry)
       let page = 1;
       let totalPages = 1;
       let totalClientsSynced = 0;
@@ -95,11 +90,9 @@ class BseSyncManager {
         page++;
       }
 
-      // Broadcast fresh client list over WebSocket to update UI without refresh
       const updatedClients = await this.clientModel.getAllClients();
       this.io.emit('clientsUpdated', updatedClients);
 
-      // 3. Paginated Trades Sync from BSE
       page = 1;
       totalPages = 1;
       let totalTradesSynced = 0;
@@ -119,11 +112,9 @@ class BseSyncManager {
         page++;
       }
 
-      // Broadcast fresh trades list
       const updatedTrades = await this.tradeModel.getTrades({});
       this.io.emit('tradesUpdated', updatedTrades);
 
-      // 4. Complete
       this.isSyncing = false;
       this.io.emit('syncStatus', {
         status: 'SUCCESS',
@@ -134,7 +125,6 @@ class BseSyncManager {
       return { status: 'SUCCESS', clientsSynced: totalClientsSynced, tradesSynced: totalTradesSynced };
     } catch (err) {
       this.isSyncing = false;
-      console.error('[Full BSE Sync Failed]', err);
       this.io.emit('syncStatus', {
         status: 'FAILED',
         progress: 0,

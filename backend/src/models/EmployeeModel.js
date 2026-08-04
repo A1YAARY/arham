@@ -13,7 +13,6 @@ class EmployeeModel {
   }
 
   async syncMappings(mappingsList) {
-    // Refresh mappings table cleanly
     await this.knex('employee_client_mappings').del();
     for (const m of mappingsList) {
       await this.knex('employee_client_mappings').insert(m);

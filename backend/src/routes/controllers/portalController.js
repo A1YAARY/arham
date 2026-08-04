@@ -1,9 +1,20 @@
 const express = require('express');
+const ClientModel = require('../../models/ClientModel');
+const TradeModel = require('../../models/TradeModel');
+const EmployeeModel = require('../../models/EmployeeModel');
+const IncentiveManager = require('../../businesslogic/managers/IncentiveManager');
+const BseSyncManager = require('../../businesslogic/managers/BseSyncManager');
 
-function createPortalController({ clientModel, tradeModel, employeeModel, incentiveManager, bseSyncManager }) {
+function createPortalController({ knex, io }) {
   const router = express.Router();
 
-  // Part B View 1: Clients (Sub-second response guaranteed from DB cache)
+  const clientModel = new ClientModel(knex);
+  const tradeModel = new TradeModel(knex);
+  const employeeModel = new EmployeeModel(knex);
+
+  const incentiveManager = new IncentiveManager(tradeModel, employeeModel);
+  const bseSyncManager = new BseSyncManager(knex, io, clientModel, tradeModel, employeeModel);
+
   router.get('/clients', async (req, res) => {
     try {
       const clients = await clientModel.getAllClients();
@@ -13,7 +24,6 @@ function createPortalController({ clientModel, tradeModel, employeeModel, incent
     }
   });
 
-  // Part B View 2: Trades (Filterable by client and date range)
   router.get('/trades', async (req, res) => {
     try {
       const { client_id, start_date, end_date } = req.query;
@@ -24,7 +34,6 @@ function createPortalController({ clientModel, tradeModel, employeeModel, incent
     }
   });
 
-  // Part B View 3: My Clients (Filter by logged-in / selected employee RM)
   router.get('/my-clients', async (req, res) => {
     try {
       const { employee_id } = req.query;
@@ -38,7 +47,6 @@ function createPortalController({ clientModel, tradeModel, employeeModel, incent
     }
   });
 
-  // Part B View 4: Employees
   router.get('/employees', async (req, res) => {
     try {
       const employees = await employeeModel.getAllEmployees();
@@ -48,7 +56,6 @@ function createPortalController({ clientModel, tradeModel, employeeModel, incent
     }
   });
 
-  // Part B View 5: Incentives (Management sees all, RM sees own)
   router.get('/incentives', async (req, res) => {
     try {
       const { employee_id } = req.query;
@@ -64,14 +71,12 @@ function createPortalController({ clientModel, tradeModel, employeeModel, incent
     }
   });
 
-  // Trigger manual sync on demand
   router.post('/sync/trigger', async (req, res) => {
-    // Non-blocking trigger: returns immediately so client doesn't wait
     bseSyncManager.triggerFullSync();
     res.json({ success: true, message: 'Sync process initiated in background' });
   });
 
-  return router;
+  return { router, bseSyncManager };
 }
 
 module.exports = createPortalController;

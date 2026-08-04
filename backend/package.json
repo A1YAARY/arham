@@ -1,7 +1,7 @@
 {
   "name": "arham-backend",
   "version": "1.0.0",
-  "description": "Backend API and Mock BSE Simulator for Arham Fintech Portal",
+  "description": "Arham  Portal",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",

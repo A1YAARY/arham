@@ -1,18 +1,21 @@
 require('dotenv').config();
 const path = require('path');
 
+
+
 module.exports = {
   development: {
-    client: process.env.DB_CLIENT ,
+    client: process.env.DB_CLIENT,
     connection: {
-      host:  process.env.DB_HOST ,
+      host: process.env.DB_HOST,
       port: process.env.DB_PORT ,
-      user:  process.env.DB_USER ,
+      user: process.env.DB_USER,
       password: process.env.DB_PASSWORD ,
       database: process.env.DB_NAME ,
       ssl: {
-        rejectUnauthorized: false
-      }
+            rejectUnauthorized: false
+          }
+       
     },
     pool: {
       min: Number(process.env.DB_POOL_MIN || 2),

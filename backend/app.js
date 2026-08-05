@@ -20,7 +20,7 @@ app.use(cors());
 app.use(express.json());
 
 async function bootstrap() {
-  await knex.migrate.latest();
+  
 
   const { bseSyncManager } = setupRouteMap(app, { knex, io });
 

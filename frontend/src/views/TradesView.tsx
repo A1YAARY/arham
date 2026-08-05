@@ -31,6 +31,7 @@ export const TradesView: React.FC = () => {
       const baseUrl =env.VITE_API_BASE_URL 
       const res = await fetch(`${baseUrl}/api/portal/trades?${params.toString()}`);
       const json = await res.json();
+      
       if (json.success) {
         setTrades(json.data);
       }
@@ -137,8 +138,8 @@ export const TradesView: React.FC = () => {
                   <td style={{ fontWeight: 500 }}>{t.client_name || 'N/A'}</td>
                   <td style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>{t.symbol}</td>
                   <td>{t.quantity}</td>
-                  <td>₹{t.price.toFixed(2)}</td>
-                  <td style={{ color: 'var(--accent-emerald)', fontWeight: 600 }}>₹{t.brokerage.toFixed(2)}</td>
+                  <td>₹{Number(t.price).toFixed(2)}</td>
+                  <td style={{ color: 'var(--accent-emerald)', fontWeight: 600 }}>₹{Number(t.brokerage).toFixed(2)}</td>
                   <td>{t.trade_date}</td>
                 </tr>
               ))

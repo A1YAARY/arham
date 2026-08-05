@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { wsService } from '../services/websocket';
-import { RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 interface SyncStatus {
   status: 'IDLE' | 'IN_PROGRESS' | 'SUCCESS' | 'FAILED';
